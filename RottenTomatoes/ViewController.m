@@ -9,11 +9,13 @@
 #import "ViewController.h"
 #import "MoviesTableViewCell.h"
 #import "UIImageView+AFNetworking.h"
+#import "MovieDetailsViewController.h"
 
 @interface ViewController () <UITableViewDataSource, UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) NSArray *movies;
+@property(nonatomic, strong) UIRefreshControl *refreshControl;
 
 @end
 
@@ -24,6 +26,14 @@
 	self.tableView.dataSource = self;
 	self.tableView.delegate = self;
 	[self fetchMovies];
+	// Initialize the refresh control.
+	self.refreshControl = [[UIRefreshControl alloc] init];
+	self.refreshControl.backgroundColor = [UIColor purpleColor];
+	self.refreshControl.tintColor = [UIColor whiteColor];
+	[self.refreshControl addTarget:self
+							action:@selector(fetchMovies)
+				  forControlEvents:UIControlEventValueChanged];
+
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
@@ -35,7 +45,9 @@
 	cell.titleLabel.text = self.movies[indexPath.row][@"title"];
 	cell.synopsisLabel.text = self.movies[indexPath.row][@"synopsis"];
 	NSURL *url = [NSURL URLWithString:self.movies[indexPath.row][@"posters"][@"detailed"]];
-	[cell.posterImageView setImageWithURL:url];
+	NSString *flixterAddress = getMoreDetailedImage([url absoluteString], ProfileImageSuffix);
+	NSURL *flixterURL = [NSURL URLWithString:flixterAddress];
+	[cell.posterImageView setImageWithURL:flixterURL];
 	return cell;
 }
 
@@ -60,7 +72,7 @@
 													[NSJSONSerialization JSONObjectWithData:data
 																					options:kNilOptions
 																					  error:&jsonError];
-													NSLog(@"Response: %@", responseDictionary);
+													//NSLog(@"Response: %@", responseDictionary);
 													self.movies = responseDictionary[@"movies"];
 													[self.tableView reloadData];
 												} else {
@@ -70,10 +82,63 @@
 	[task resume];
 }
 
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+	MoviesTableViewCell *cell = sender;
+	NSIndexPath *indexPath = [self.tableView indexPathForCell:(cell)];
+	
+	NSDictionary *movie = self.movies[indexPath.row];
+	MovieDetailsViewController *movieDetailsViewController = segue.destinationViewController;
+	movieDetailsViewController.movie = movie;
+	
+}
+
+- (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath{
+	[self.tableView deselectRowAtIndexPath:(indexPath) animated:YES];
+
+}
+
+NSString *getMoreDetailedImage(NSString* url , NSString* detailRequired){
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(.*)(movie.*)_(.*)"
+	options:NSRegularExpressionCaseInsensitive error:&error];
+	
+	NSTextCheckingResult *match = [regex firstMatchInString:url
+													options:0
+													  range:NSMakeRange(0, [url length])];
+	NSString *moviesSubString;
+	if (match) {
+		NSRange secondHalfRange = [match rangeAtIndex:2];
+		moviesSubString = [url substringWithRange:secondHalfRange];
+		moviesSubString = [FlixerNewAddress stringByAppendingString:moviesSubString];
+		moviesSubString = [moviesSubString stringByAppendingString:detailRequired];
+		moviesSubString = [moviesSubString stringByAppendingString:@".jpg"];
+	}
+	return moviesSubString;
+}
 
 - (void)didReceiveMemoryWarning {
 	[super didReceiveMemoryWarning];
 	// Dispose of any resources that can be recreated.
+}
+
+- (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView{
+	if (self.movies){
+		return 1;
+	} else {
+		// Display a message when the table is empty
+		UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height)];
+		
+		messageLabel.text = @"No data is currently available. Please pull down to refresh.";
+		messageLabel.textColor = [UIColor blackColor];
+		messageLabel.numberOfLines = 0;
+		messageLabel.textAlignment = NSTextAlignmentCenter;
+		messageLabel.font = [UIFont fontWithName:@"Palatino-Italic" size:20];
+		[messageLabel sizeToFit];
+		
+		self.tableView.backgroundView = messageLabel;
+		self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+	}
+	return 0;
 }
 
 @end
