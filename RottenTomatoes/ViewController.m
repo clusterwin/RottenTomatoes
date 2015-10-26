@@ -30,10 +30,17 @@
 	self.refreshControl = [[UIRefreshControl alloc] init];
 	self.refreshControl.backgroundColor = [UIColor purpleColor];
 	self.refreshControl.tintColor = [UIColor whiteColor];
+	[self.tableView addSubview:self.refreshControl];
 	[self.refreshControl addTarget:self
-							action:@selector(fetchMovies)
+							action:@selector(refreshTable)
 				  forControlEvents:UIControlEventValueChanged];
 
+}
+
+- (void)refreshTable {
+	[self fetchMovies];
+	[self.refreshControl endRefreshing];
+	[self.tableView reloadData];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
@@ -140,5 +147,7 @@ NSString *getMoreDetailedImage(NSString* url , NSString* detailRequired){
 	}
 	return 0;
 }
+
+
 
 @end
