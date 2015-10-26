@@ -34,7 +34,6 @@
 	[self.refreshControl addTarget:self
 							action:@selector(refreshTable)
 				  forControlEvents:UIControlEventValueChanged];
-
 }
 
 - (void)refreshTable {
@@ -96,6 +95,7 @@
 	NSDictionary *movie = self.movies[indexPath.row];
 	MovieDetailsViewController *movieDetailsViewController = segue.destinationViewController;
 	movieDetailsViewController.movie = movie;
+	movieDetailsViewController.title = movie[@"title"];
 	
 }
 

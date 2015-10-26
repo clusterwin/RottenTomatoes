@@ -26,6 +26,7 @@
 	NSString *flixterAddress = getMoreDetailedImage([url absoluteString], OriginalImageSuffix);
 	NSURL *flixterURL = [NSURL URLWithString:flixterAddress];
 	[self.movieImageView setImageWithURL:flixterURL];
+	
 }
 
 - (void)didReceiveMemoryWarning {
