@@ -34,7 +34,6 @@
 	[self.refreshControl addTarget:self
 							action:@selector(refreshTable)
 				  forControlEvents:UIControlEventValueChanged];
-
 }
 
 - (void)refreshTable {
@@ -96,6 +95,7 @@
 	NSDictionary *movie = self.movies[indexPath.row];
 	MovieDetailsViewController *movieDetailsViewController = segue.destinationViewController;
 	movieDetailsViewController.movie = movie;
+	movieDetailsViewController.title = movie[@"title"];
 	
 }
 
@@ -135,7 +135,7 @@ NSString *getMoreDetailedImage(NSString* url , NSString* detailRequired){
 		// Display a message when the table is empty
 		UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height)];
 		
-		messageLabel.text = @"No data is currently available. Please pull down to refresh.";
+		messageLabel.text = @"Network Error! Please pull down to refresh once you have an internet connection.";
 		messageLabel.textColor = [UIColor blackColor];
 		messageLabel.numberOfLines = 0;
 		messageLabel.textAlignment = NSTextAlignmentCenter;
