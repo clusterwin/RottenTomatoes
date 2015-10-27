@@ -37,14 +37,18 @@
 		NSURL *url = [NSURL URLWithString:self.movie[@"posters"][@"detailed"]];
 	NSString *flixterAddressOriginal = getMoreDetailedImage([url absoluteString], OriginalImageSuffix);
 	NSURL *flixterURLOriginal = [NSURL URLWithString:flixterAddressOriginal];
+	[self.movieImageView setImageWithURL:flixterURLOriginal];
+	self.movieImageView.alpha = 0;
 	
-	
-	[UIView transitionWithView:self.movieImageView
-					  duration:15.0f
-					   options:UIViewAnimationOptionTransitionCrossDissolve
-					animations:^{
-						[self.movieImageView setImageWithURL:flixterURLOriginal];
-					} completion:nil];
+	[UIView animateWithDuration:2.5
+						  delay:0.0
+						options: UIViewAnimationCurveEaseOut
+					 animations:^{
+						self.movieImageView.alpha = 100;
+					 }
+					 completion:^(BOOL finished){
+						 NSLog(@"Done!");
+					 }];
 }
 
 
